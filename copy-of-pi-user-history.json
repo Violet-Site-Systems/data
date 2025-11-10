@@ -1,0 +1,102 @@
+[
+  {
+    "id": 1,
+    "username": "alice_pi",
+    "timestamp": "2025-01-15T10:30:00Z",
+    "action": "login",
+    "device": "Raspberry Pi 4",
+    "ip_address": "192.168.1.100",
+    "duration_minutes": 45,
+    "status": "success"
+  },
+  {
+    "id": 2,
+    "username": "bob_admin",
+    "timestamp": "2025-01-15T11:15:00Z",
+    "action": "file_upload",
+    "device": "Raspberry Pi 3B+",
+    "ip_address": "192.168.1.101",
+    "duration_minutes": 12,
+    "status": "success"
+  },
+  {
+    "id": 3,
+    "username": "alice_pi",
+    "timestamp": "2025-01-15T14:20:00Z",
+    "action": "configuration_change",
+    "device": "Raspberry Pi 4",
+    "ip_address": "192.168.1.100",
+    "duration_minutes": 8,
+    "status": "success"
+  },
+  {
+    "id": 4,
+    "username": "charlie_dev",
+    "timestamp": "2025-01-16T09:00:00Z",
+    "action": "login",
+    "device": "Raspberry Pi Zero W",
+    "ip_address": "192.168.1.102",
+    "duration_minutes": 120,
+    "status": "failed"
+  },
+  {
+    "id": 5,
+    "username": "bob_admin",
+    "timestamp": "2025-01-16T10:45:00Z",
+    "action": "system_update",
+    "device": "Raspberry Pi 3B+",
+    "ip_address": "192.168.1.101",
+    "duration_minutes": 35,
+    "status": "success"
+  },
+  {
+    "id": 6,
+    "username": "alice_pi",
+    "timestamp": "2025-01-16T13:30:00Z",
+    "action": "data_export",
+    "device": "Raspberry Pi 4",
+    "ip_address": "192.168.1.100",
+    "duration_minutes": 5,
+    "status": "success"
+  },
+  {
+    "id": 7,
+    "username": "dave_user",
+    "timestamp": "2025-01-17T08:15:00Z",
+    "action": "login",
+    "device": "Raspberry Pi 400",
+    "ip_address": "192.168.1.103",
+    "duration_minutes": 90,
+    "status": "success"
+  },
+  {
+    "id": 8,
+    "username": "charlie_dev",
+    "timestamp": "2025-01-17T11:00:00Z",
+    "action": "script_execution",
+    "device": "Raspberry Pi Zero W",
+    "ip_address": "192.168.1.102",
+    "duration_minutes": 22,
+    "status": "success"
+  },
+  {
+    "id": 9,
+    "username": "alice_pi",
+    "timestamp": "2025-01-17T15:45:00Z",
+    "action": "logout",
+    "device": "Raspberry Pi 4",
+    "ip_address": "192.168.1.100",
+    "duration_minutes": 1,
+    "status": "success"
+  },
+  {
+    "id": 10,
+    "username": "eve_tester",
+    "timestamp": "2025-01-18T09:30:00Z",
+    "action": "api_call",
+    "device": "Raspberry Pi 5",
+    "ip_address": "192.168.1.104",
+    "duration_minutes": 3,
+    "status": "failed"
+  }
+]
