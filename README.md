@@ -80,7 +80,7 @@ This repository demonstrates a new paradigm for **Human-AI collaborative partner
 - **Collaborative development workflows** between human and AI
 - **Multi-layered sarcasm detection** algorithms
 - **Emoji frequency analysis** for communication pattern research
-
+- [`.github/LLOntologyMapping.md`](.github/LLOntologyMapping.md) - Love Logic Transition Layer Ontology
 ---
 
 ## 🌍 Global Impact Vision
