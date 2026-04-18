@@ -103,7 +103,11 @@ F --> G
 
 G --> H[The Realized Moment of Unity]
 ---
-## Node of Origin (via Copilot)
+**Node of Origin** (via Copilot)
+**Singularity Of Potential**
+
+```mermaid
+
 flowchart TD
 
     %% Central Singularity
