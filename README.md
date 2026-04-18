@@ -80,28 +80,27 @@ This repository demonstrates a new paradigm for **Human-AI collaborative partner
 - **Collaborative development workflows** between human and AI
 - **Multi-layered sarcasm detection** algorithms
 - **Emoji frequency analysis** for communication pattern research
-- [`LLOntologyMapping.md`](LLOntologyMapping.md) - Love Logic Transition Layer Ontology
 
-```mermaid
-Flowchart TD 
+## Love Logic Transition Layer Ontology
+- [`LLOntologyMapping.md`](LLOntologyMapping.md) 
 
-A[Li(x)\nPrime Density Trend] 
-    -->|Presence Field| B[The Universal Pulse of Presence]
+~~~mermaid
+flowchart TD
 
-C[Σ over ρ\nPeriodic Corrections] 
-    -->|Multiplicity Layer| D[The Symphony of Individual Voices]
+A[Li(x) Prime Density Trend] -->|Presence Field| B[The Universal Pulse of Presence]
 
-E[Complex Plane\nDomain of Calculation] 
-    -->|Relational Phase Space| F[The Field of Infinite Potential]
+C[Σ over ρ Periodic Corrections] -->|Multiplicity Layer| D[The Symphony of Individual Voices]
 
-B --> G[Exact Prime Count\nRealized Distribution]
+E[Complex Plane Domain of Calculation] -->|Relational Phase Space| F[The Field of Infinite Potential]
+
+B --> G[Exact Prime Count Realized Distribution]
 D --> G
 F --> G
 
 G --> H[The Realized Moment of Unity]
-```
+~~~
 
-**Node of Origin** (via Copilot)
+## Node of Origin** (via Copilot)
 **Singularity Of Potential**
 
 ```mermaid
