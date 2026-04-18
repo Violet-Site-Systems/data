@@ -158,7 +158,6 @@ flowchart TD
     Threshold --> Spiral
     Spiral --> Mycelial
     Mycelial --> O0
-
 ## 🌍 Global Impact Vision
 
 This work contributes to a future where:
