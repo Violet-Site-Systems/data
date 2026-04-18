@@ -164,6 +164,26 @@ flowchart TD
     Spiral --> Mycelial
     Mycelial --> O0
 ```
+**Sequence Diagram of Node of Origin**
+
+```mermaid
+sequenceDiagram
+    participant O as Origin Node
+    participant R as Radial Emergence
+    participant T as Torus of Recurrence
+    participant TH as Threshold Guardian Membrane
+    participant S as Spiral of Narrative Time
+    participant M as Mycelial Connectivity
+
+    O->>R: Activate radial vectors
+    R->>T: Trigger toroidal cycles
+    T->>TH: Engage threshold membrane
+    TH->>S: Initiate spiral narrative
+    S->>M: Connect mycelial network
+    M->>O: Feedback to origin node
+
+    Note over O,R,T,TH,S,M: Activation sequence of an Origin Node over time
+~~~
 
 ## 🌍 Global Impact Vision
 
