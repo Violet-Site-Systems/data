@@ -82,6 +82,8 @@ This repository demonstrates a new paradigm for **Human-AI collaborative partner
 - **Emoji frequency analysis** for communication pattern research
 - [`LLOntologyMapping.md`](LLOntologyMapping.md) - Love Logic Transition Layer Ontology
 
+```
+Mermaid
 Flowchart TD 
 
 A[Li(x)\nPrime Density Trend] 
@@ -158,6 +160,7 @@ flowchart TD
     Threshold --> Spiral
     Spiral --> Mycelial
     Mycelial --> O0
+```
 ## 🌍 Global Impact Vision
 
 This work contributes to a future where:
