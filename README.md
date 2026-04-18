@@ -82,8 +82,10 @@ This repository demonstrates a new paradigm for **Human-AI collaborative partner
 - **Emoji frequency analysis** for communication pattern research
 - [`LLOntologyMapping.md`](LLOntologyMapping.md) - Love Logic Transition Layer Ontology
 
-Mermaid
-```
+- **Origin Node Flow**
+
+
+```mermaid
 Flowchart TD 
 
 A[Li(x)\nPrime Density Trend] 
