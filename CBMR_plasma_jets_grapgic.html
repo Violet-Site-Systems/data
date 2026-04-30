@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Playables SDK -->
+<script>// Playables SDK v1.0.0
+// Game lifecycle bridge: rAF-based game-ready detection + event communication
+(function() {
+  'use strict';
+
+  // Idempotency: skip if already initialized (e.g., server-side injection
+  // followed by client-side inject-javascript via the Bloks webview component).
+  if (window.playablesSDK) return;
+
+  var HANDLER_NAME = 'playablesGameEventHandler';
+  var ANDROID_BRIDGE_NAME = '_MetaPlayablesBridge';
+  var RAF_FRAME_THRESHOLD = 3;
+
+  var gameReadySent = false;
+  var firstInteractionSent = false;
+  var errorSent = false;
+  var frameCount = 0;
+  var originalRAF = window.requestAnimationFrame;
+
+  // --- Transport Layer ---
+
+  function hasIOSBridge() {
+    return !!(window.webkit &&
+              window.webkit.messageHandlers &&
+              window.webkit.messageHandlers[HANDLER_NAME]);
+  }
+
+  function hasAndroidBridge() {
+    return !!(window[ANDROID_BRIDGE_NAME] &&
+              typeof window[ANDROID_BRIDGE_NAME].postEvent === 'function');
+  }
+
+  function isInIframe() {
+    return !!(window.parent && window.parent !== window);
+  }
+
+  function sendEvent(eventName, payload) {
+    var message = {
+      type: eventName,
+      payload: payload || {},
+      timestamp: Date.now()
+    };
+
+    if (hasIOSBridge()) {
+      try {
+        window.webkit.messageHandlers[HANDLER_NAME].postMessage(message);
+      } catch (e) { /* ignore */ }
+      return;
+    }
+
+    if (hasAndroidBridge()) {
+    try {
+      var p = payload || {};
+      p.__secureToken = window.__fbAndroidBridgeAuthToken || '';
+      p.timestamp = message.timestamp;
+      window[ANDROID_BRIDGE_NAME].postEvent(
+        eventName,
+        JSON.stringify(p)
+      );
+    } catch (e) { /* ignore */ }
+    return;
+  }
+
+    if (isInIframe()) {
+      try {
+        window.parent.postMessage(message, '*');
+      } catch (e) { /* ignore */ }
+      return;
+    }
+  }
+
+  // --- rAF Game-Ready Detection ---
+
+  function onFrame() {
+    if (gameReadySent) return;
+
+    frameCount++;
+    if (frameCount >= RAF_FRAME_THRESHOLD) {
+      gameReadySent = true;
+      sendEvent('game_ready', {
+        frame_count: frameCount,
+        detected_at: Date.now()
+      });
+      return;
+    }
+
+    originalRAF.call(window, onFrame);
+  }
+
+  if (originalRAF) {
+    window.requestAnimationFrame = function(callback) {
+      if (!gameReadySent) {
+        return originalRAF.call(window, function(timestamp) {
+          frameCount++;
+          if (frameCount >= RAF_FRAME_THRESHOLD && !gameReadySent) {
+            gameReadySent = true;
+            sendEvent('game_ready', {
+              frame_count: frameCount,
+              detected_at: Date.now()
+            });
+          }
+          callback(timestamp);
+        });
+      }
+      return originalRAF.call(window, callback);
+    };
+  }
+
+  // --- First User Interaction Detection ---
+
+  function setupFirstInteractionDetection() {
+    var events = ['touchstart', 'mousedown', 'keydown'];
+
+    function onFirstInteraction() {
+      if (firstInteractionSent) return;
+      firstInteractionSent = true;
+      sendEvent('user_interaction_start', null);
+
+      for (var i = 0; i < events.length; i++) {
+        document.removeEventListener(events[i], onFirstInteraction, true);
+      }
+    }
+
+    for (var i = 0; i < events.length; i++) {
+      document.addEventListener(events[i], onFirstInteraction, true);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupFirstInteractionDetection);
+  } else {
+    setupFirstInteractionDetection();
+  }
+
+  // --- Auto Error Capture ---
+
+  window.addEventListener('error', function(event) {
+    if (errorSent) return;
+    errorSent = true;
+    sendEvent('error', {
+      message: event.message || 'Unknown error',
+      source: event.filename || '',
+      lineno: event.lineno || 0,
+      colno: event.colno || 0,
+      auto_captured: true
+    });
+  });
+
+  window.addEventListener('unhandledrejection', function(event) {
+    if (errorSent) return;
+    errorSent = true;
+    var reason = event.reason;
+    sendEvent('error', {
+      message: (reason instanceof Error) ? reason.message : String(reason),
+      type: 'unhandled_promise_rejection',
+      auto_captured: true
+    });
+  });
+
+  // --- Public API ---
+
+  window.playablesSDK = {
+    complete: function(score) {
+      sendEvent('game_ended', {
+        score: score,
+        completed: true
+      });
+    },
+
+    error: function(message) {
+      if (errorSent) return;
+      errorSent = true;
+      sendEvent('error', {
+        message: message || 'Unknown error',
+        auto_captured: false
+      });
+    },
+
+    sendEvent: function(eventName, payload) {
+      if (!eventName || typeof eventName !== 'string') return;
+      sendEvent(eventName, payload);
+    }
+  };
+
+  // Kick off rAF detection in case no game code calls rAF immediately
+  if (originalRAF) {
+    originalRAF.call(window, onFrame);
+  }
+})();</script>
+<script>window.Intl=window.Intl||{};Intl.t=function(s){return(Intl._locale&&Intl._locale[s])||s;};</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mother Rock Galaxy Formation - Fred Gangstad's Theory</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap');
+    
+    body {
+        font-family: 'Inter', sans-serif;
+        overflow: hidden;
+        background: #000;
+    }
+    
+    .title-font {
+        font-family: 'Orbitron', sans-serif;
+    }
+    
+    .glow-red {
+        text-shadow: 0 0 10px rgba(255, 60, 0, 0.8), 0 0 20px rgba(255, 60, 0, 0.6);
+    }
+    
+    .glow-blue {
+        text-shadow: 0 0 10px rgba(100, 180, 255, 0.8), 0 0 20px rgba(100, 180, 255, 0.4);
+    }
+    
+    input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        background: transparent;
+        cursor: pointer;
+    }
+    
+    input[type="range"]::-webkit-slider-track {
+        background: linear-gradient(to right, #ff3c00 0%, #ff8c00 50%, #64b4ff 100%);
+        height: 6px;
+        border-radius: 3px;
+        box-shadow: 0 0 8px rgba(255, 140, 0, 0.5);
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        background: #fff;
+        height: 18px;
+        width: 18px;
+        border-radius: 50%;
+        box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+        margin-top: -6px;
+    }
+    
+    input[type="range"]::-moz-range-track {
+        background: linear-gradient(to right, #ff3c00 0%, #ff8c00 50%, #64b4ff 100%);
+        height: 6px;
+        border-radius: 3px;
+        box-shadow: 0 0 8px rgba(255, 140, 0, 0.5);
+    }
+    
+    input[type="range"]::-moz-range-thumb {
+        background: #fff;
+        height: 18px;
+        width: 18px;
+        border-radius: 50%;
+        border: none;
+        box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+    }
+    
+    .label-badge {
+        backdrop-filter: blur(12px);
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(255, 140, 0, 0.3);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.8; transform: scale(1.05); }
+    }
+    
+    .pulse-anim {
+        animation: pulse 2s ease-in-out infinite;
+    }
+</style>
+</head>
+<body class="bg-black text-white">
+    <div id="canvas-container" class="absolute inset-0"></div>
+    
+    <!-- UI Overlay -->
+    <div class="relative z-10 pointer-events-none">
+        <!-- Header -->
+        <div class="absolute top-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-b from-black/80 to-transparent">
+            <h1 class="title-font text-2xl md:text-4xl font-black mb-1 glow-red">
+                MOTHER ROCK GALAXY FORMATION
+            </h1>
+            <p class="text-sm md:text-base text-orange-200/90 font-light">
+                Fred Gangstad's Alternative Cosmology Model Visualization
+            </p>
+        </div>
+        
+        <!-- Phase Label -->
+        <div class="absolute top-24 md:top-28 left-1/2 -translate-x-1/2">
+            <div id="phase-label" class="label-badge px-6 py-3 rounded-full">
+                <span class="text-lg md:text-xl font-semibold text-orange-300">Bar Formation: Straight Jets</span>
+            </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="absolute bottom-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-t from-black/90 via-black/70 to-transparent pointer-events-auto">
+            <div class="max-w-5xl mx-auto">
+                <!-- Labels Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3 mb-4 text-xs md:text-sm">
+                    <div class="label-badge p-2 rounded-lg text-center">
+                        <div class="w-3 h-3 bg-gradient-to-r from-red-600 to-orange-500 rounded-full mx-auto mb-1 pulse-anim"></div>
+                        <span class="text-orange-200">Mother Rock Core</span>
+                    </div>
+                    <div class="label-badge p-2 rounded-lg text-center">
+                        <div class="w-3 h-3 bg-gradient-to-r from-orange-500 to-yellow-400 rounded-full mx-auto mb-1"></div>
+                        <span class="text-orange-200">Z-Pinch Plasma Tubes</span>
+                    </div>
+                    <div class="label-badge p-2 rounded-lg text-center">
+                        <div class="w-3 h-3 bg-gradient-to-r from-yellow-400 to-orange-300 rounded-full mx-auto mb-1"></div>
+                        <span class="text-orange-200">Bar Formation</span>
+                    </div>
+                    <div class="label-badge p-2 rounded-lg text-center">
+                        <div class="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-300 rounded-full mx-auto mb-1"></div>
+                        <span class="text-blue-200">Gyroscopic 90° Turn</span>
+                    </div>
+                    <div class="label-badge p-2 rounded-lg text-center col-span-2 md:col-span-1">
+                        <div class="w-3 h-3 bg-gradient-to-r from-blue-300 to-white rounded-full mx-auto mb-1"></div>
+                        <span class="text-blue-200">Spiral Arms: Trailing Wakes</span>
+                    </div>
+                </div>
+                
+                <!-- Slider & Play Controls -->
+                <div class="flex flex-col md:flex-row items-center gap-4 mb-3">
+                    <button id="play-pause" class="px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 rounded-lg font-semibold transition-all duration-200 shadow-lg shadow-orange-900/50 hover:shadow-orange-700/50 hover:scale-105">
+                        <span id="play-icon">▶ Play Transition</span>
+                    </button>
+                    <div class="flex-1 w-full">
+                        <label class="text-xs text-gray-400 mb-1 block">Evolution Progress: <span id="progress-val">0%</span></label>
+                        <input type="range" id="time-slider" min="0" max="100" value="0" class="w-full">
+                    </div>
+                    <button id="reset" class="px-6 py-3 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:scale-105">
+                        ↺ Reset
+                    </button>
+                </div>
+                
+                <!-- Explainer -->
+                <div class="label-badge p-3 md:p-4 rounded-xl text-xs md:text-sm leading-relaxed">
+                    <p class="text-gray-300">
+                        <span class="text-orange-400 font-semibold">Theory Overview:</span> In Fred Gangstad's "Mother Rock" cosmology, galaxies form from a central dense core ejecting matter through Z-pinch plasma tubes. Initial straight polar jets create a galactic bar structure. A 90° gyroscopic shift of the core causes the jets to trail, curving into spiral arms. Stars condense in the cooling plasma wakes left behind, forming the luminous spiral structure we observe.
+                    </p>
+                    <p class="text-gray-500 text-xs mt-2 italic">
+                        Note: This is an artistic visualization of an alternative cosmological model and is not mainstream scientific consensus.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, clock;
+        let motherRock, jetTop, jetBottom, barParticles, spiralParticles, stars;
+        let animationProgress = 0;
+        let isPlaying = false;
+        let autoPlaySpeed = 0.15;
+        
+        const barLength = 12;
+        const jetParticleCount = 2000;
+        const spiralParticleCount = 3000;
+        const starCount = 1500;
+        
+        function init() {
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x000000, 0.01);
+            
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(20, 15, 20);
+            camera.lookAt(0, 0, 0);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+            
+            clock = new THREE.Clock();
+            
+            createStarfield();
+            createMotherRock();
+            createJets();
+            createParticles();
+            setupLights();
+            setupControls();
+            setupInteraction();
+            
+            animate();
+        }
+        
+        function createStarfield() {
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(starCount * 3);
+            const colors = new Float32Array(starCount * 3);
+            
+            for (let i = 0; i < starCount; i++) {
+                const r = 40 + Math.random() * 60;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                
+                positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+                positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+                positions[i * 3 + 2] = r * Math.cos(phi);
+                
+                const brightness = 0.5 + Math.random() * 0.5;
+                colors[i * 3] = brightness;
+                colors[i * 3 + 1] = brightness;
+                colors[i * 3 + 2] = brightness + Math.random() * 0.2;
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            
+            const material = new THREE.PointsMaterial({
+                size: 0.15,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending
+            });
+            
+            stars = new THREE.Points(geometry, material);
+            scene.add(stars);
+        }
+        
+        function createMotherRock() {
+            const coreGroup = new THREE.Group();
+            
+            const coreGeom = new THREE.SphereGeometry(1.2, 32, 32);
+            const coreMat = new THREE.MeshPhongMaterial({
+                color: 0xff4400,
+                emissive: 0xff2200,
+                emissiveIntensity: 2,
+                shininess: 100
+            });
+            motherRock = new THREE.Mesh(coreGeom, coreMat);
+            coreGroup.add(motherRock);
+            
+            const glowGeom = new THREE.SphereGeometry(1.8, 32, 32);
+            const glowMat = new THREE.MeshBasicMaterial({
+                color: 0xff6600,
+                transparent: true,
+                opacity: 0.3,
+                blending: THREE.AdditiveBlending,
+                side: THREE.BackSide
+            });
+            const glow = new THREE.Mesh(glowGeom, glowMat);
+            coreGroup.add(glow);
+            
+            scene.add(coreGroup);
+            motherRock.group = coreGroup;
+        }
+        
+        function createJets() {
+            const jetGeom = new THREE.CylinderGeometry(0.3, 0.8, barLength, 16, 1, true);
+            const jetMat = new THREE.MeshBasicMaterial({
+                color: 0xff6600,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending,
+                side: THREE.DoubleSide
+            });
+            
+            jetTop = new THREE.Mesh(jetGeom, jetMat);
+            jetTop.position.y = barLength / 2;
+            scene.add(jetTop);
+            
+            jetBottom = new THREE.Mesh(jetGeom, jetMat.clone());
+            jetBottom.position.y = -barLength / 2;
+            jetBottom.rotation.x = Math.PI;
+            scene.add(jetBottom);
+        }
+        
+        function createParticles() {
+            // Bar phase particles - straight jets
+            const barGeom = new THREE.BufferGeometry();
+            const barPos = new Float32Array(jetParticleCount * 3);
+            const barCol = new Float32Array(jetParticleCount * 3);
+            const barSizes = new Float32Array(jetParticleCount);
+            
+            for (let i = 0; i < jetParticleCount; i++) {
+                const side = i < jetParticleCount / 2 ? 1 : -1;
+                const dist = Math.random() * barLength;
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.random() * 0.5 * (1 - dist / barLength);
+                
+                barPos[i * 3] = Math.cos(angle) * radius;
+                barPos[i * 3 + 1] = side * dist;
+                barPos[i * 3 + 2] = Math.sin(angle) * radius;
+                
+                const heat = 1 - dist / barLength;
+                barCol[i * 3] = 1.0;
+                barCol[i * 3 + 1] = 0.4 + heat * 0.4;
+                barCol[i * 3 + 2] = heat * 0.2;
+                
+                barSizes[i] = (0.1 + Math.random() * 0.2) * (1 + heat);
+            }
+            
+            barGeom.setAttribute('position', new THREE.BufferAttribute(barPos, 3));
+            barGeom.setAttribute('color', new THREE.BufferAttribute(barCol, 3));
+            barGeom.setAttribute('size', new THREE.BufferAttribute(barSizes, 1));
+            
+            const barMat = new THREE.PointsMaterial({
+                size: 0.15,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.9,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true
+            });
+            
+            barParticles = new THREE.Points(barGeom, barMat);
+            scene.add(barParticles);
+            
+            // Spiral phase particles
+            const spiralGeom = new THREE.BufferGeometry();
+            const spiralPos = new Float32Array(spiralParticleCount * 3);
+            const spiralCol = new Float32Array(spiralParticleCount * 3);
+            const spiralSizes = new Float32Array(spiralParticleCount);
+            
+            for (let i = 0; i < spiralParticleCount; i++) {
+                spiralPos[i * 3] = 0;
+                spiralPos[i * 3 + 1] = 0;
+                spiralPos[i * 3 + 2] = 0;
+                
+                spiralCol[i * 3] = 0.4;
+                spiralCol[i * 3 + 1] = 0.7;
+                spiralCol[i * 3 + 2] = 1.0;
+                
+                spiralSizes[i] = 0.1 + Math.random() * 0.15;
+            }
+            
+            spiralGeom.setAttribute('position', new THREE.BufferAttribute(spiralPos, 3));
+            spiralGeom.setAttribute('color', new THREE.BufferAttribute(spiralCol, 3));
+            spiralGeom.setAttribute('size', new THREE.BufferAttribute(spiralSizes, 1));
+            
+            const spiralMat = new THREE.PointsMaterial({
+                size: 0.12,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true
+            });
+            
+            spiralParticles = new THREE.Points(spiralGeom, spiralMat);
+            scene.add(spiralParticles);
+        }
+        
+        function updateVisualization(progress) {
+            animationProgress = progress / 100;
+            const t = animationProgress;
+            
+            // Phase 1: 0-0.3 = Pure bar formation
+            // Phase 2: 0.3-0.7 = 90° gyroscopic turn
+            // Phase 3: 0.7-1.0 = Spiral arms develop
+            
+            const barPhase = Math.max(0, 1 - t * 3.33);
+            const turnPhase = Math.max(0, Math.min(1, (t - 0.3) / 0.4));
+            const spiralPhase = Math.max(0, (t - 0.6) / 0.4);
+            
+            // Rotate the Mother Rock and jets during turn
+            if (motherRock.group) {
+                motherRock.group.rotation.z = turnPhase * Math.PI / 2;
+            }
+            jetTop.rotation.z = turnPhase * Math.PI / 2;
+            jetBottom.rotation.z = Math.PI + turnPhase * Math.PI / 2;
+            
+            // Update jet opacity
+            jetTop.material.opacity = 0.6 * (1 - spiralPhase * 0.7);
+            jetBottom.material.opacity = 0.6 * (1 - spiralPhase * 0.7);
+            
+            // Update bar particles
+            barParticles.material.opacity = 0.9 * (1 - spiralPhase);
+            
+            // Update spiral particles
+            const spiralPos = spiralParticles.geometry.attributes.position.array;
+            const spiralCol = spiralParticles.geometry.attributes.color.array;
+            const spiralSizes = spiralParticles.geometry.attributes.size.array;
+            
+            for (let i = 0; i < spiralParticleCount; i++) {
+                const armId = i % 2; // Two arms
+                const particleT = (i / spiralParticleCount) * 2;
+                const angle = particleT * Math.PI * 4 + armId * Math.PI;
+                const radius = particleT * 15 * spiralPhase;
+                
+                // Add curl as gyroscopic turn progresses
+                const curlFactor = turnPhase;
+                const spiralAngle = angle + curlFactor * radius * 0.3;
+                
+                spiralPos[i * 3] = Math.cos(spiralAngle) * radius;
+                spiralPos[i * 3 + 1] = (Math.random() - 0.5) * 2 * (1 - particleT * 0.8);
+                spiralPos[i * 3 + 2] = Math.sin(spiralAngle) * radius;
+                
+                // Color: hot plasma to cool stars
+                const cooling = 1 - particleT * 0.7;
+                spiralCol[i * 3] = 0.4 + cooling * 0.6;
+                spiralCol[i * 3 + 1] = 0.7 + cooling * 0.3;
+                spiralCol[i * 3 + 2] = 1.0;
+                
+                // Stars form in cooling wakes
+                spiralSizes[i] = (0.1 + Math.random() * 0.15) * (0.5 + cooling * 0.5);
+            }
+            
+            spiralParticles.geometry.attributes.position.needsUpdate = true;
+            spiralParticles.geometry.attributes.color.needsUpdate = true;
+            spiralParticles.geometry.attributes.size.needsUpdate = true;
+            spiralParticles.material.opacity = spiralPhase * 0.85;
+            
+            // Update phase label
+            const label = document.getElementById('phase-label').querySelector('span');
+            if (t < 0.3) {
+                label.textContent = 'Bar Formation: Straight Jets';
+                label.className = 'text-lg md:text-xl font-semibold text-orange-300';
+            } else if (t < 0.7) {
+                label.textContent = 'Gyroscopic 90° Turn';
+                label.className = 'text-lg md:text-xl font-semibold text-blue-300 glow-blue';
+            } else {
+                label.textContent = 'Spiral Arms: Trailing Plasma Wakes';
+                label.className = 'text-lg md:text-xl font-semibold text-cyan-200 glow-blue';
+            }
+            
+            document.getElementById('progress-val').textContent = Math.round(progress) + '%';
+        }
+        
+        function setupLights() {
+            const ambient = new THREE.AmbientLight(0x111122, 0.5);
+            scene.add(ambient);
+            
+            const coreLight = new THREE.PointLight(0xff5500, 2, 30);
+            coreLight.position.set(0, 0, 0);
+            scene.add(coreLight);
+            
+            const dirLight = new THREE.DirectionalLight(0x6666aa, 0.3);
+            dirLight.position.set(10, 20, 10);
+            scene.add(dirLight);
+        }
+        
+        function setupControls() {
+            const slider = document.getElementById('time-slider');
+            const playBtn = document.getElementById('play-pause');
+            const resetBtn = document.getElementById('reset');
+            const playIcon = document.getElementById('play-icon');
+            
+            slider.addEventListener('input', (e) => {
+                isPlaying = false;
+                playIcon.textContent = '▶ Play Transition';
+                updateVisualization(e.target.value);
+            });
+            
+            playBtn.addEventListener('click', () => {
+                isPlaying = !isPlaying;
+                playIcon.textContent = isPlaying ? '⏸ Pause' : '▶ Play Transition';
+            });
+            
+            resetBtn.addEventListener('click', () => {
+                isPlaying = false;
+                playIcon.textContent = '▶ Play Transition';
+                slider.value = 0;
+                updateVisualization(0);
+            });
+        }
+        
+        function setupInteraction() {
+            let isDragging = false;
+            let prevMouse = { x: 0, y: 0 };
+            
+            renderer.domElement.addEventListener('mousedown', () => isDragging = true);
+            renderer.domElement.addEventListener('mouseup', () => isDragging = false);
+            renderer.domElement.addEventListener('mouseleave', () => isDragging = false);
+            
+            renderer.domElement.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.clientX - prevMouse.x;
+                const deltaY = e.clientY - prevMouse.y;
+                
+                const rotSpeed = 0.005;
+                camera.position.x = camera.position.x * Math.cos(deltaX * rotSpeed) - camera.position.z * Math.sin(deltaX * rotSpeed);
+                camera.position.z = camera.position.x * Math.sin(deltaX * rotSpeed) + camera.position.z * Math.cos(deltaX * rotSpeed);
+                camera.position.y += deltaY * 0.05;
+                
+                camera.lookAt(0, 0, 0);
+                prevMouse = { x: e.clientX, y: e.clientY };
+            });
+            
+            renderer.domElement.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            });
+            
+            renderer.domElement.addEventListener('touchend', () => isDragging = false);
+            
+            renderer.domElement.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.touches[0].clientX - prevMouse.x;
+                const deltaY = e.touches[0].clientY - prevMouse.y;
+                
+                const rotSpeed = 0.005;
+                camera.position.x = camera.position.x * Math.cos(deltaX * rotSpeed) - camera.position.z * Math.sin(deltaX * rotSpeed);
+                camera.position.z = camera.position.x * Math.sin(deltaX * rotSpeed) + camera.position.z * Math.cos(deltaX * rotSpeed);
+                camera.position.y += deltaY * 0.05;
+                
+                camera.lookAt(0, 0, 0);
+                prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            });
+            
+            renderer.domElement.addEventListener('wheel', (e) => {
+                const zoomSpeed = 0.1;
+                const dir = e.deltaY > 0 ? 1 : -1;
+                camera.position.multiplyScalar(1 + dir * zoomSpeed);
+                const dist = camera.position.length();
+                if (dist < 10) camera.position.normalize().multiplyScalar(10);
+                if (dist > 80) camera.position.normalize().multiplyScalar(80);
+            });
+            
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const elapsed = clock.getElapsedTime();
+            
+            if (isPlaying) {
+                const slider = document.getElementById('time-slider');
+                let val = parseFloat(slider.value);
+                val += autoPlaySpeed;
+                if (val >= 100) {
+                    val = 100;
+                    isPlaying = false;
+                    document.getElementById('play-icon').textContent = '▶ Play Transition';
+                }
+                slider.value = val;
+                updateVisualization(val);
+            }
+            
+            // Rotate starfield slowly
+            if (stars) stars.rotation.y += 0.0001;
+            
+            // Pulse Mother Rock
+            if (motherRock) {
+                motherRock.scale.x = 1 + Math.sin(elapsed * 2) * 0.05;
+                motherRock.scale.y = 1 + Math.sin(elapsed * 2) * 0.05;
+                motherRock.scale.z = 1 + Math.sin(elapsed * 2) * 0.05;
+            }
+            
+            // Gentle camera orbit when idle
+            if (!isPlaying && animationProgress === 0) {
+                camera.position.x = Math.sin(elapsed * 0.1) * 25;
+                camera.position.z = Math.cos(elapsed * 0.1) * 25;
+                camera.lookAt(0, 0, 0);
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        init();
+        updateVisualization(0);
+    </script>
+</body>
+</html>
