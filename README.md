@@ -185,7 +185,8 @@ sequenceDiagram
 ~~~
 
 ## CBMR Plasma Jets Graphic by Meta.AI
-- [`CBMR_plasma_jets_graphic.html`](CBMR_plasma_jets_graphic.html)-
+
+[`CBMR_plasma_jets_graphic.html`](CBMR_plasma_jets_graphic.html)
 
 
 ## 🌍 Global Impact Vision
