@@ -184,7 +184,7 @@ sequenceDiagram
     Note over O,R,T,TH,S,M: Activation sequence of an Origin Node over time
 ~~~
 
-##CBMR_plasma_jets.html['CBMR_plasma_jets.html']
+##CBMR_plasma_jets.html['CBMR_plasma_jets.html'](CBMR_plasma_jets.html)
 
 
 ## 🌍 Global Impact Vision
